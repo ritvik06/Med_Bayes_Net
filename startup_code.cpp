@@ -1,3 +1,4 @@
+	int count=0;
 #include <iostream>
 #include <string>
 #include <vector>
@@ -26,7 +27,6 @@ public:
     Graph_Node(string name,int n,vector<string> vals)
 	{
 		Node_Name=name;
-	
 		nvalues=n;
 		values=vals;
 		
@@ -36,6 +36,7 @@ public:
 	{
 		return Node_Name;
 	}
+
 	vector<int> get_children()
 	{
 		return Children;
@@ -77,7 +78,14 @@ public:
         Children.push_back(new_child_index);
         return 1;
     }
-
+    int find_index(string str){	
+    	for(int i=0;i<nvalues;i++){
+    		if(values[i].compare(str)==0){
+    			return i;
+    		}
+    	}
+    	return -1;
+    }
 
 
 };
@@ -126,6 +134,11 @@ public:
         }
         return listIt; 
     }
+
+    int num_vars(){
+
+    	return Pres_Graph.size();
+    }
     //get the iterator of a node with a given name
     list<Graph_Node>::iterator search_node(string val_name)
     {
@@ -142,6 +155,10 @@ public:
 	
 
 };
+
+vector<Graph_Node> variables;
+vector<vector<int> > data_values;
+network Alarm;
 
 network read_network()
 {
@@ -189,8 +206,8 @@ network read_network()
     				}
      				Graph_Node new_node(name,values.size(),values);
      				int pos=Alarm.addNode(new_node);
-
-     				
+     				variables.push_back(new_node);
+     				// count_var++;		
      		}
      		else if(temp.compare("probability")==0)
      		{
@@ -229,25 +246,16 @@ network read_network()
                         
      					curr_CPT.push_back(atof(temp.c_str()));
      					
-     					ss2>>temp;
-                       
-                        
+     					ss2>>temp;        
 
     				}
                     
                     listIt->set_CPT(curr_CPT);
-
-
      		}
             else
             {
                 
             }
-     		
-     		
-
-    		
-    		
     	}
     	
     	if(find==1)
@@ -257,11 +265,57 @@ network read_network()
   	return Alarm;
 }
 
+void dat_reader()
+{
+	string val;
+	ifstream myfile;
+	myfile.open("records.dat");
+	vector<int> row;
+
+	if(myfile.is_open()){
+		// cout << "entered" << endl;
+		// cout << count_var;
+		// cout << Alarm.num_vars();
+		while(true){
+			for(int i=0;i<Alarm.num_vars();i++){
+				myfile >> val;
+				if(myfile.eof()) break;
+
+				else if(val.compare("\"?\"")==0){
+					// cout << "Entered " << i << endl;
+					row.push_back(-1);
+				}
+				else{
+					int index = variables[i].find_index(val);
+					row.push_back(index);
+				}
+
+			}
+
+			// for(int i=0;i<count;i++){
+			// 	cout << row[i] << " ";
+			// }
+
+			if(myfile.eof()) break;
+
+			data_values.push_back(row);
+			row.clear();
+
+		}
+	}
+
+
+
+}
+
 
 int main()
 {
-	network Alarm;
-	Alarm=read_network();
+	// network Alarm;
+	Alarm = read_network();
+	dat_reader();
+
+	// cout << "Data_Values_filled" << endl;
     
 // Example: to do something
 	cout<<"Perfect! Hurrah! \n";
