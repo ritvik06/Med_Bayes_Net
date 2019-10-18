@@ -12,15 +12,18 @@ class Graph_Node{
     int nvalues;  // Number of categories a variable represented by this node can take
     vector<string> values; // Categories of possible values
     vector<float> CPT; // conditional probability table as a 1-d array . Look for BIF format to understand its meaning
-
+    vector<float> org_CPT;
   public:
     Graph_Node(string name,int n,vector<string> vals);
     string get_name();
     vector<int> get_children();
     vector<string>  get_Parents();
   	vector<float> get_CPT();
+    vector<float> get_org_CPT();
+
   	int  get_nvalues();
     void  set_CPT(vector<float> new_CPT);
+    void  set_org_CPT(vector<float> new_CPT);
     void  set_Parents(vector<string> Parent_Nodes);
     int add_child(int new_child_index );
   	vector<string> get_values();
@@ -29,8 +32,8 @@ class Graph_Node{
 
 
 class network{
-    list <Graph_Node> Pres_Graph;
   public:
+      list <Graph_Node> Pres_Graph;
       int addNode(Graph_Node node);
     	int netSize();
       int get_index(string val_name);

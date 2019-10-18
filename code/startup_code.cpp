@@ -1,20 +1,7 @@
-// #include <iostream>
-// #include <string>
-// #include <vector>
-// #include <list>
-// #include <fstream>
-// #include <sstream>
-// #include <cstdlib>
-//
-//
-// // Format checker just assumes you have Alarm.bif and Solved_Alarm.bif (your file) in current directory
-// using namespace std;
+// Format checker just assumes you have Alarm.bif and Solved_Alarm.bif (your file) in current directory
 #include "startup_code.h"
 // Our graph consists of a list of nodes where each node is represented as follows:
-// class Graph_Node{
-//
-//
-// public:
+
 	// Constructor- a node is initialised with its name and its categories
   Graph_Node::Graph_Node(string name,int n,vector<string> vals)
 	{
@@ -41,6 +28,11 @@
 	{
 		return CPT;
 	}
+  vector<float>Graph_Node:: get_org_CPT()
+  {
+    return org_CPT;
+  }
+
 	int Graph_Node:: get_nvalues()
 	{
 		return nvalues;
@@ -53,6 +45,11 @@
 	{
 		CPT.clear();
 		CPT=new_CPT;
+	}
+  void Graph_Node:: set_org_CPT(vector<float> new_CPT)
+	{
+		org_CPT.clear();
+		org_CPT=new_CPT;
 	}
   void Graph_Node:: set_Parents(vector<string> Parent_Nodes)
     {
@@ -223,6 +220,7 @@ network read_network()
     				}
 
                     listIt->set_CPT(curr_CPT);
+                    listIt->set_org_CPT(curr_CPT);
 
 
      		}
@@ -245,12 +243,12 @@ network read_network()
 }
 
 
-int main()
-{
-	network Alarm;
-	Alarm=read_network();
-
-// Example: to do something
-	cout<<"Perfect! Hurrah! \n";
-
-}
+// int main()
+// {
+// 	network Alarm;
+// 	Alarm=read_network();
+//
+// // Example: to do something
+// 	cout<<"Perfect! Hurrah! \n";
+//
+// }
