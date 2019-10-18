@@ -1,6 +1,6 @@
 #include "bayes_learning.h"
 
-vector<float> initialize_probability(network n, vector<vector<int> > db){
+void initialize_probability(network n, vector<vector<int> > db){
   list<Graph_Node> g_l = n.Pres_Graph;
   list <Graph_Node>::iterator it;
   int ind=0;
