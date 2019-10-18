@@ -1,9 +1,9 @@
 # Med_Bayes_Net
 
 
-- [ ] Data Parser 
+- [x] Data Parser 
 
-- [ ] Initialization
+- [x] Initialization
  First Layer. Remove ? Get Probability
  
   For all other layers P(X|Y1,...Yn) = 1/(2^n)
