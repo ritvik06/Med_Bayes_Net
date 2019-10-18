@@ -2,8 +2,6 @@
 #define STARTUP_H
 #include "comm_headers.h"
 
-using namespace std;
-
 class Graph_Node{
   private:
     string Node_Name;  // Variable name

@@ -10,4 +10,9 @@
 #include <sstream>
 #include <cstdlib>
 
+using namespace std;
+
+typedef vector<vector<int> > DATABASE;
+
+
 #endif

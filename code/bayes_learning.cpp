@@ -1,6 +1,16 @@
 #include "bayes_learning.h"
 
-void initialize_probability(network n, vector<vector<int> > db){
+//Need to make it plug and play for different intialization strategies
+/*
+Current Strategy:
+ If a node has no parents, then check its column in the DB. Remove all '-1' and
+ get probability on the remaining values. WONT WORK IF EMPTY
+
+If it has parents, Get the remaining probability from the known data. \
+Then divide it uniformly
+
+*/
+void initialize_probability(network n, DATABASE db){
   list<Graph_Node> g_l = n.Pres_Graph;
   list <Graph_Node>::iterator it;
   int ind=0;
@@ -46,6 +56,28 @@ void initialize_probability(network n, vector<vector<int> > db){
 }
 }
 
+
+// DATABASE modify_database(DATABASE db, network n){
+//   DATABASE new_db = db;
+//   int n,m;
+//   n = db.size();
+//   m = db[0].size();
+//   for (int i=0;i<n;i++){
+//     vector<int>row = db[i];
+//     vector<int> p_val;
+//     for(int j = 0; j<m;j++){
+//       if (row[j]==-1){
+//         Graph_Node g = *(n.get_nth_node(j));
+//
+//
+//
+//       }
+//     }
+//
+//
+//
+//   }
+// }
 
 
 
