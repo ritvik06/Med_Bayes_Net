@@ -25,6 +25,8 @@ class Graph_Node{
     void  set_Parents(vector<string> Parent_Nodes);
     int add_child(int new_child_index );
   	vector<string> get_values();
+    int find_index(string str);
+
 
 };
 
@@ -37,9 +39,12 @@ class network{
       int get_index(string val_name);
       list<Graph_Node>::iterator get_nth_node(int n);
       list<Graph_Node>::iterator search_node(string val_name);
+      int num_vars();
+
 };
 
 network read_network();
+void dat_reader();
 
 
 #endif

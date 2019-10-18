@@ -6,11 +6,8 @@
   Graph_Node::Graph_Node(string name,int n,vector<string> vals)
 	{
 		Node_Name=name;
-
 		nvalues=n;
 		values=vals;
-
-
 	}
 	string Graph_Node::get_name()
 	{
@@ -67,8 +64,14 @@
         Children.push_back(new_child_index);
         return 1;
     }
-
-// };
+    int Graph_Node::find_index(string str){
+    	for(int i=0;i<nvalues;i++){
+    		if(values[i].compare(str)==0){
+    			return i;
+    		}
+    	}
+    	return -1;
+    }
 
 
  // The whole network represted as a list of nodes
@@ -111,6 +114,10 @@
         }
         return listIt;
     }
+
+    int network::num_vars(){
+    	return Pres_Graph.size();
+    }
     //get the iterator of a node with a given name
     list<Graph_Node>::iterator network::search_node(string val_name)
     {
@@ -126,6 +133,10 @@
     }
 
 
+
+vector<Graph_Node> variables;
+vector<vector<int> > data_values;
+network Alarm;
 
 network read_network()
 {
@@ -173,8 +184,8 @@ network read_network()
     				}
      				Graph_Node new_node(name,values.size(),values);
      				int pos=Alarm.addNode(new_node);
-
-
+     				variables.push_back(new_node);
+     				// count_var++;
      		}
      		else if(temp.compare("probability")==0)
      		{
@@ -212,27 +223,17 @@ network read_network()
      				{
 
      					curr_CPT.push_back(atof(temp.c_str()));
-
      					ss2>>temp;
-
-
 
     				}
 
                     listIt->set_CPT(curr_CPT);
                     listIt->set_org_CPT(curr_CPT);
-
-
      		}
             else
             {
 
             }
-
-
-
-
-
     	}
 
     	if(find==1)
@@ -241,6 +242,50 @@ network read_network()
 
   	return Alarm;
 }
+
+void dat_reader()
+{
+	string val;
+	ifstream myfile;
+	myfile.open("records.dat");
+	vector<int> row;
+
+	if(myfile.is_open()){
+		// cout << "entered" << endl;
+		// cout << count_var;
+		// cout << Alarm.num_vars();
+		while(true){
+			for(int i=0;i<Alarm.num_vars();i++){
+				myfile >> val;
+				if(myfile.eof()) break;
+
+				else if(val.compare("\"?\"")==0){
+					// cout << "Entered " << i << endl;
+					row.push_back(-1);
+				}
+				else{
+					int index = variables[i].find_index(val);
+					row.push_back(index);
+				}
+
+			}
+
+			// for(int i=0;i<count;i++){
+			// 	cout << row[i] << " ";
+			// }
+
+			if(myfile.eof()) break;
+
+			data_values.push_back(row);
+			row.clear();
+
+		}
+	}
+
+
+
+}
+
 
 
 // int main()
