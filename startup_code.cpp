@@ -1,4 +1,3 @@
-	int count=0;
 #include <iostream>
 #include <string>
 #include <vector>
