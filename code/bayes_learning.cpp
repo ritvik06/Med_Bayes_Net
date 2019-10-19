@@ -10,7 +10,8 @@ If it has parents, Get the remaining probability from the known data. \
 Then divide it uniformly
 
 */
-void initialize_probability(network n, DATABASE db){
+
+void initialize_probability(network &n, DATABASE &db){
   list<Graph_Node> g_l = n.Pres_Graph;
   list <Graph_Node>::iterator it;
   int ind=0;
@@ -56,6 +57,47 @@ void initialize_probability(network n, DATABASE db){
 }
 }
 
+// Function for filling the database from the CPT, E Step
+DATABASE modify_database(DATABASE db, network n){
+  list<Graph_Node> g_l = n.Pres_Graph;
+  vector<string> parents;
+  vector<float> CPT_node;
+  vector<int> CPT_num;
+  vector<float> prob_list;
+  // int alpha = 0.5;
+  int first_rank;
+  int second_rank;
+  int max_product,sum;
+
+  for(int i=0;i<db.size();i++){
+    int index = ques_pos[i];
+    Graph_Node ques_node = *(n.get_nth_node(index));
+    parents = ques_node.get_Parents();
+    CPT_node = ques_node.get_CPT();
+    sum=0;
+    for(int j=(parents.size()-1);j>=0;j--){
+      if(j==parents.size()){
+        sum+=db[i][n.get_index(parents[j])];  
+        max_product=*
+      }
+      else{
+        sum+=(parents[j]*max_product);
+      }
+
+
+    }
+
+    for(int j=0;j<ques_node.get_nvalues();j++){
+      second_rank*=first_rank;
+      prob_list.push_back(CPT_node[second_rank-1]);
+    }
+
+    db[i][index] = distance(prob_list.begin(),max_element(prob_list.begin(),prob_list.end()));
+  }
+
+  return db;
+
+}
 
 // DATABASE modify_database(DATABASE db, network n){
 //   DATABASE new_db = db;
@@ -83,8 +125,11 @@ void initialize_probability(network n, DATABASE db){
 
 int main(int argc, char const *argv[]) {
     network Alarm;
+    vector<vector<int> > 
     Alarm = read_network();
+    dat_reader(Alarm);
 
+    initialize_probability(Alarm,)
     // Graph_Node g = *(Alarm.get_nth_node(0));
 
     // cout<<it.begin()<<" "<<it++<<" "<<endl;

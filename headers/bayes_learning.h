@@ -3,6 +3,6 @@
 #include "startup_code.h"
 
 void initialize_probability(network n, DATABASE db);
-
+DATABASE modify_database(DATABASE db, network n);
 
 #endif

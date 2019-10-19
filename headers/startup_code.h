@@ -43,8 +43,13 @@ class network{
 
 };
 
+// extern unordered_map<string,Graph_Node> variables;
+extern vector<vector<int> > data_values;
+extern vector<int> ques_pos;
+// extern network Alarm;
+
 network read_network();
-void dat_reader();
+void dat_reader(network n);
 
 
 #endif
