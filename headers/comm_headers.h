@@ -9,6 +9,9 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <cmath>
+#include<iterator>
+#include<bits/stdc++.h>
 
 using namespace std;
 

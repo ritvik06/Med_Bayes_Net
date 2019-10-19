@@ -1,2 +1,2 @@
 main:
-	g++ -o "run.out" -I headers/ code/*.cpp
+	g++ -std=c++11 -o "run.out" -I headers/ code/*.cpp
