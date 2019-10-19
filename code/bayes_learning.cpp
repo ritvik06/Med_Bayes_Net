@@ -10,14 +10,14 @@ If it has parents, Get the remaining probability from the known data. \
 Then divide it uniformly
 
 */
-void initialize_probability(network n, DATABASE db){
-  list<Graph_Node> g_l = n.Pres_Graph;
+void initialize_probability(network* n, DATABASE db){
+  list<Graph_Node> g_l = (*n).Pres_Graph;
   list <Graph_Node>::iterator it;
   int ind=0;
   for (it = g_l.begin();it!=g_l.end();it++){
-    Graph_Node curr_node = *(n.get_nth_node(ind));
-    vector<float> curr_table = curr_node.get_CPT();
-    if (curr_node.get_Parents().size()!=0){ //If not a starting node
+    Graph_Node* curr_node = &(*((*n).get_nth_node(ind)));
+    vector<float> curr_table = (*curr_node).get_CPT();
+    if ((*curr_node).get_Parents().size()!=0){ //If not a starting node
       float filled=0;
       int num=0;
       for (int i = 0; i< curr_table.size();i++){
@@ -33,14 +33,14 @@ void initialize_probability(network n, DATABASE db){
           curr_table[i] = left;
         }
     }
-    curr_node.set_CPT(curr_table);
+    (*curr_node).set_CPT(curr_table);
   }else{
-    int n = db.size();
-    int m = db[0].size();
-    int all_v = curr_node.get_nvalues();
+    int n_r = db.size();
+    int n_c = db[0].size();
+    int all_v = (*curr_node).get_nvalues();
     vector<float> freq(all_v,0);
     int all_sum=0;
-    for (int i = 0; i< n;i++){
+    for (int i = 0; i< n_r;i++){
       int val = db[i][ind];
       if (val >= 0){
         freq[val]++;
@@ -50,7 +50,7 @@ void initialize_probability(network n, DATABASE db){
     for (int i = 0; i<all_v;i++){
       freq[i]/=all_sum;
     }
-    curr_node.set_CPT(freq);
+    (*curr_node).set_CPT(freq);
   }
   ind++;
 }
