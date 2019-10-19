@@ -10,16 +10,14 @@ If it has parents, Get the remaining probability from the known data. \
 Then divide it uniformly
 
 */
-
 void initialize_probability(network* n, DATABASE db){
-  // network n = *m;
+
   list<Graph_Node> g_l = (*n).Pres_Graph;
   list <Graph_Node>::iterator it;
   int ind=0;
   for (it = g_l.begin();it!=g_l.end();it++){
     Graph_Node* curr_node = &(*((*n).get_nth_node(ind)));
     vector<float> curr_table = (*curr_node).get_CPT();
-    // cout<<curr_table[0]<<endl;
     if ((*curr_node).get_Parents().size()!=0){ //If not a starting node
       float filled=0;
       int num=0;
@@ -105,12 +103,75 @@ DATABASE modify_database(DATABASE db, network &n){
 
 }
 
+void m_step(network* n, DATABASE db){
+    list<Graph_Node> g_l = (*n).Pres_Graph;
+    list<Graph_Node>::iterator it;
+    int ind = 0;
+    int n_r = db.size();
+    int n_c = db[0].size();
+
+    for (it = g_l.begin();it!=g_l.end();it++){
+      Graph_Node* curr_node = &(*((*n).get_nth_node(ind)));
+      vector<float> curr_table = (*curr_node).get_CPT();
+      vector<float> org_table = (*curr_node).get_org_CPT();
+      int np = (*curr_node).get_nvalues();
+
+      vector<string> parents = (*curr_node).get_Parents();
+      vector<int> index_list,max_poss_list;
+      for (int i = 0; i<parents.size();i++){
+        int curr_ind = (*n).get_index(parents[i]);
+        Graph_Node *p_node = &(*((*n).get_nth_node(curr_ind)));
+        max_poss_list.push_back((*p_node).get_nvalues());
+        index_list.push_back(curr_ind);
+      }
+
+      vector<float> final_table;
+      for (int i = 0; i<org_table.size();i++){
+        if (org_table[i] == -1){
+          vector<int>prob;
+          int cur_p = i/np;
+          int rem =  i%np;
+          prob.push_back(cur_p);
+          for (int t = 0; t<max_poss_list.size();t++){
+            cur_p = rem/max_poss_list[t];
+            rem = rem%max_poss_list[t];
+            prob.push_back(cur_p);
+          }
+
+
+          int count=0;
+          for (int j=0;j<n_r;j++){
+            bool okRow=true;
+            for (int l = 0; l<index_list.size();l++){
+              if (db[j][l] == prob[l]){
+                continue;
+              }else{
+                okRow=false;
+                break;
+              }
+            }
+            if (okRow){
+              count++;
+            }
+          }
+          float ans = count/n_r;
+          final_table.push_back(ans);
+        }else{
+          final_table.push_back(curr_table[i]);
+        }
+      }
+      (*curr_node).set_CPT(final_table);
+      ind++;
+    }
+
+}
 
 
 
 
 int main(int argc, char const *argv[]) {
     network Alarm;
+
 // <<<<<<< HEAD
 //     vector<vector<int> > 
 //     Alarm = read_network();
@@ -153,7 +214,6 @@ int main(int argc, char const *argv[]) {
     //   }
     //   // cout<<"------"<<endl;
     // }
-// >>>>>>> 88645cac9fd3245fc76205ea159705336f6f4cf0x
 
     // Graph_Node g = *(Alarm.get_nth_node())
     // cout<<it.begin()<<" "<<it++<<" "<<endl;

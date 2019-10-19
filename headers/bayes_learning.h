@@ -2,7 +2,8 @@
 #define BAYES_LEARNING_H
 #include "startup_code.h"
 
+void initialize_probability(network *n, DATABASE db);
+void m_step(network *n, DATABASE db);
 DATABASE modify_database(DATABASE db, network &n);
-void initialize_probability(network* n, DATABASE db);
 
 #endif
