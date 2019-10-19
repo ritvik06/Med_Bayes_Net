@@ -94,9 +94,13 @@ DATABASE modify_database(DATABASE db, network &n){
       temp_sum=0;
       temp_sum=sum+(j*max_product);
       prob_list.push_back(CPT_node[temp_sum]);
+      // cout << CPT_node[temp_sum] << " ";
     }
+    // cout << endl;
     
     db[i][index] = distance(prob_list.begin(),max_element(prob_list.begin(),prob_list.end()));
+
+    prob_list.clear();
   }
 
   return db;
