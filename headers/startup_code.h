@@ -49,7 +49,7 @@ extern vector<int> ques_pos;
 // extern network Alarm;
 
 network read_network();
-void dat_reader(network n);
+DATABASE dat_reader(network n);
 
 
 #endif

@@ -63,8 +63,7 @@ void initialize_probability(network* n, DATABASE db){
 }
 
 // Function for filling the database from the CPT, E Step
-DATABASE modify_database(DATABASE db, network n){
-  list<Graph_Node> g_l = n.Pres_Graph;
+DATABASE modify_database(DATABASE db, network &n){
   vector<string> parents;
   vector<float> CPT_node;
   vector<int> CPT_num;
@@ -72,31 +71,33 @@ DATABASE modify_database(DATABASE db, network n){
   // int alpha = 0.5;
   int first_rank;
   int second_rank;
-  int max_product,sum;
+  int max_product,sum,temp_sum;
 
   for(int i=0;i<db.size();i++){
     int index = ques_pos[i];
-    Graph_Node ques_node = *(n.get_nth_node(index));
+    Graph_Node ques_node = (*n.get_nth_node(index));
     parents = ques_node.get_Parents();
     CPT_node = ques_node.get_CPT();
-    sum=0;
+    sum=0,temp_sum=0;
+    max_product=1;
     for(int j=(parents.size()-1);j>=0;j--){
       if(j==parents.size()){
         sum+=db[i][n.get_index(parents[j])];  
-        max_product=*
+        max_product=(*n.search_node(parents[j])).get_nvalues();
       }
       else{
-        sum+=(parents[j]*max_product);
+        sum+=(db[i][n.get_index(parents[j])]*max_product);
+        max_product*=(*n.search_node(parents[j])).get_nvalues();
       }
-
 
     }
 
     for(int j=0;j<ques_node.get_nvalues();j++){
-      second_rank*=first_rank;
-      prob_list.push_back(CPT_node[second_rank-1]);
+      temp_sum=0;
+      temp_sum=sum+(j*max_product);
+      prob_list.push_back(CPT_node[temp_sum]);
     }
-
+    
     db[i][index] = distance(prob_list.begin(),max_element(prob_list.begin(),prob_list.end()));
   }
 
@@ -121,17 +122,38 @@ int main(int argc, char const *argv[]) {
     (Alarm) = read_network();
     // cout<<"Test"<<endl;
     DATABASE d = dat_reader(Alarm);
-    // initialize_probability(&Alarm,d);
-    for (int j = 0;j<37;j++){
-      cout<<"------"<<j+1<<"-----"<<endl;
-      list<Graph_Node>::iterator g = (Alarm.get_nth_node(j));
-      cout<<"Num of Parents: "<<(*g).get_Parents().size()<<endl;
-      for (int i = 0; i< (*g).get_CPT().size();i++){
-        cout<<((*g).get_CPT())[i]<<endl;
+    initialize_probability(&Alarm,d);
+    DATABASE new_db = modify_database(d,Alarm);
+
+    for(int i=0;i<5;i++){
+      for(int j=0;j<37;j++){
+        cout << d[i][j] << " ";
       }
-      // cout<<"------"<<endl;
+      cout << endl;
     }
-// >>>>>>> 88645cac9fd3245fc76205ea159705336f6f4cf0
+      cout << endl;
+      cout << endl;
+      cout << endl;
+      cout << endl;
+
+
+    for(int i=0;i<5;i++){
+      for(int j=0;j<37;j++){
+        cout << new_db[i][j] << " ";
+      }
+      cout << endl;
+    }
+
+    // for (int j = 0;j<37;j++){
+    //   cout<<"------"<<j+1<<"-----"<<endl;
+    //   list<Graph_Node>::iterator g = (Alarm.get_nth_node(j));
+    //   cout<<"Num of Parents: "<<(*g).get_Parents().size()<<endl;
+    //   for (int i = 0; i< (*g).get_CPT().size();i++){
+    //     cout<<((*g).get_CPT())[i]<<endl;
+    //   }
+    //   // cout<<"------"<<endl;
+    // }
+// >>>>>>> 88645cac9fd3245fc76205ea159705336f6f4cf0x
 
     // Graph_Node g = *(Alarm.get_nth_node())
     // cout<<it.begin()<<" "<<it++<<" "<<endl;
