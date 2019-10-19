@@ -11,14 +11,16 @@ Then divide it uniformly
 
 */
 
-void initialize_probability(network &n, DATABASE &db){
-  list<Graph_Node> g_l = n.Pres_Graph;
+void initialize_probability(network* n, DATABASE db){
+  // network n = *m;
+  list<Graph_Node> g_l = (*n).Pres_Graph;
   list <Graph_Node>::iterator it;
   int ind=0;
   for (it = g_l.begin();it!=g_l.end();it++){
-    Graph_Node curr_node = *(n.get_nth_node(ind));
-    vector<float> curr_table = curr_node.get_CPT();
-    if (curr_node.get_Parents().size()!=0){ //If not a starting node
+    Graph_Node* curr_node = &(*((*n).get_nth_node(ind)));
+    vector<float> curr_table = (*curr_node).get_CPT();
+    // cout<<curr_table[0]<<endl;
+    if ((*curr_node).get_Parents().size()!=0){ //If not a starting node
       float filled=0;
       int num=0;
       for (int i = 0; i< curr_table.size();i++){
@@ -34,14 +36,14 @@ void initialize_probability(network &n, DATABASE &db){
           curr_table[i] = left;
         }
     }
-    curr_node.set_CPT(curr_table);
+    (*curr_node).set_CPT(curr_table);
   }else{
-    int n = db.size();
-    int m = db[0].size();
-    int all_v = curr_node.get_nvalues();
+    int n_r = db.size();
+    int n_c = db[0].size();
+    int all_v = (*curr_node).get_nvalues();
     vector<float> freq(all_v,0);
     int all_sum=0;
-    for (int i = 0; i< n;i++){
+    for (int i = 0; i< n_r;i++){
       int val = db[i][ind];
       if (val >= 0){
         freq[val]++;
@@ -51,10 +53,13 @@ void initialize_probability(network &n, DATABASE &db){
     for (int i = 0; i<all_v;i++){
       freq[i]/=all_sum;
     }
-    curr_node.set_CPT(freq);
+    (*curr_node).set_CPT(freq);
   }
+  // cout<<curr_node.get_CPT()[0]<<endl;
   ind++;
+  // cout<<ind<<endl;
 }
+
 }
 
 // Function for filling the database from the CPT, E Step
@@ -99,39 +104,36 @@ DATABASE modify_database(DATABASE db, network n){
 
 }
 
-// DATABASE modify_database(DATABASE db, network n){
-//   DATABASE new_db = db;
-//   int n,m;
-//   n = db.size();
-//   m = db[0].size();
-//   for (int i=0;i<n;i++){
-//     vector<int>row = db[i];
-//     vector<int> p_val;
-//     for(int j = 0; j<m;j++){
-//       if (row[j]==-1){
-//         Graph_Node g = *(n.get_nth_node(j));
-//
-//
-//
-//       }
-//     }
-//
-//
-//
-//   }
-// }
+
 
 
 
 int main(int argc, char const *argv[]) {
     network Alarm;
-    vector<vector<int> > 
-    Alarm = read_network();
-    dat_reader(Alarm);
+// <<<<<<< HEAD
+//     vector<vector<int> > 
+//     Alarm = read_network();
+//     dat_reader(Alarm);
 
-    initialize_probability(Alarm,)
-    // Graph_Node g = *(Alarm.get_nth_node(0));
+//     initialize_probability(Alarm,)
+//     // Graph_Node g = *(Alarm.get_nth_node(0));
+// =======
+    (Alarm) = read_network();
+    // cout<<"Test"<<endl;
+    DATABASE d = dat_reader(Alarm);
+    // initialize_probability(&Alarm,d);
+    for (int j = 0;j<37;j++){
+      cout<<"------"<<j+1<<"-----"<<endl;
+      list<Graph_Node>::iterator g = (Alarm.get_nth_node(j));
+      cout<<"Num of Parents: "<<(*g).get_Parents().size()<<endl;
+      for (int i = 0; i< (*g).get_CPT().size();i++){
+        cout<<((*g).get_CPT())[i]<<endl;
+      }
+      // cout<<"------"<<endl;
+    }
+// >>>>>>> 88645cac9fd3245fc76205ea159705336f6f4cf0
 
+    // Graph_Node g = *(Alarm.get_nth_node())
     // cout<<it.begin()<<" "<<it++<<" "<<endl;
   return 0;
 }
