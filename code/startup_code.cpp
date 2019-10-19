@@ -134,9 +134,10 @@
 
 
 
-vector<Graph_Node> variables;
-vector<vector<int> > data_values;
-network Alarm;
+// unordered_map<string,Graph_Node> variables;
+// DATABASE data_values;
+vector<int> ques_pos;
+// network Alarm;
 
 network read_network()
 {
@@ -184,7 +185,7 @@ network read_network()
     				}
      				Graph_Node new_node(name,values.size(),values);
      				int pos=Alarm.addNode(new_node);
-     				variables.push_back(new_node);
+     				// variables[name]=new_node;
      				// count_var++;
      		}
      		else if(temp.compare("probability")==0)
@@ -243,8 +244,9 @@ network read_network()
   	return Alarm;
 }
 
-void dat_reader()
+DATABASE dat_reader(network n)
 {
+    DATABASE data_values;
 	string val;
 	ifstream myfile;
 	myfile.open("records.dat");
@@ -255,16 +257,17 @@ void dat_reader()
 		// cout << count_var;
 		// cout << Alarm.num_vars();
 		while(true){
-			for(int i=0;i<Alarm.num_vars();i++){
+			for(int i=0;i<n.num_vars();i++){
 				myfile >> val;
 				if(myfile.eof()) break;
 
 				else if(val.compare("\"?\"")==0){
 					// cout << "Entered " << i << endl;
+                    ques_pos.push_back(i);
 					row.push_back(-1);
 				}
 				else{
-					int index = variables[i].find_index(val);
+					int index = (*(n.get_nth_node(i))).find_index(val);
 					row.push_back(index);
 				}
 
@@ -282,7 +285,7 @@ void dat_reader()
 		}
 	}
 
-
+    return data_values;
 
 }
 

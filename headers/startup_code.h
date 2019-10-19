@@ -44,7 +44,7 @@ class network{
 };
 
 network read_network();
-void dat_reader();
+DATABASE dat_reader(network n);
 
 
 #endif

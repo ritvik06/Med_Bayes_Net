@@ -146,6 +146,7 @@ void m_step(network* n, DATABASE db){
 int main(int argc, char const *argv[]) {
     network Alarm;
     Alarm = read_network();
+    DATABASE d = dat_reader(Alarm);
 
     // Graph_Node g = *(Alarm.get_nth_node(0));
 
