@@ -241,20 +241,22 @@ void m_step(network* n, DATABASE db){
         index_list.push_back(curr_ind);
         org_max_list_mul*=((*p_node).get_nvalues());
       }
-
+      vector<int> new_index_list  = index_list;
       // index_list.push_back((*n).get_index((*curr_node).get_name()));
       int ind = (*n).get_index( (*curr_node).get_name() );
       index_list.insert(index_list.begin(),ind);
       // sort(index_list.begin(),index_list.end());
 
       // cout<<"Size of max_pos_list: "<<index_list.size()<<endl;
-      // for (int w = 0; w<index_list.size();w++){
-      //   cout<<max_poss_list[w]<<" ";
-      // }
-      // cout<<endl;
-      // cout<< index_list.size()<<" ";
+
+      // cout<<"Index List Size: "<< index_list.size()<<" "<<endl;
       // for (int w = 0; w<index_list.size();w++){
       //   cout<<index_list[w]<<" ";
+      // }
+      // cout<<endl;
+      // cout<<"------------"<<endl;
+      // for (int w = 0; w<max_poss_list.size();w++){
+      //   cout<<max_poss_list[w]<<" ";
       // }
       // cout<<endl;
       // cout<<endl<<"Number of elements in CPT: "<<org_table.size()<<" N values of the node: "<<np<<endl;
@@ -267,26 +269,44 @@ void m_step(network* n, DATABASE db){
           vector<int>prob;
           int cur_p = i/max_list_mul;
           int rem =  i%max_list_mul;
-          max_list_mul/=np;
+          // max_list_mul/=np;
           if (max_list_mul==0){
             max_list_mul=1;
           }
           prob.push_back(cur_p);
-          for (int t = max_poss_list.size()-1; t>=0;t--){
-            cur_p = rem/max_list_mul;
-            rem = rem%max_list_mul;
+          // for (int t = max_poss_list.size()-1; t>=0;t--){
+          for (int t = 0;t<max_poss_list.size();t++){
             max_list_mul /=max_poss_list[t];
             if (max_list_mul == 0){
               max_list_mul=1;
             }
+            cur_p = rem/max_list_mul;
+            rem = rem%max_list_mul;
+
             prob.push_back(cur_p);
           }
+          // for ( int i = 0; i<prob.size();i++){
+          //   cout<<prob[i]<<" ";
+          // }
+          // cout<<endl;
 
 
-
-          float count=0;
+          float count=1;
+          float denominator=3;
           for (int j=0;j<n_r;j++){
             bool okRow=true;
+            bool den=true;
+            for (int y = 0; y<new_index_list.size();y++){
+              int db_n_col = new_index_list[y];
+              if (db[j][db_n_col] == prob[y+1]){
+                continue;
+              }else{
+                den=false;
+                break;
+              }
+            }
+
+
             for (int l = 0; l<index_list.size();l++){
               int db_col = index_list[l];
               if (db[j][db_col] == prob[l]){
@@ -296,12 +316,15 @@ void m_step(network* n, DATABASE db){
                 break;
               }
             }
+            if (den){
+              denominator++;
+            }
             if (okRow){
               count++;
             }
           }
-          // cout<<endl;
-          float ans = ((float) count/n_r);
+          // cout<<denominator<<" "<<count<<endl;
+          float ans = ((float) count/denominator) ;
           // cout<<count<<" "<<" "<<n_r<<" "<<ans<<" "<<endl;
           final_table.push_back(ans);
         }else{
@@ -337,12 +360,12 @@ float get_score(network n,network acn){
 
 void pipeline(network *n, DATABASE d,network acn,time_t start_time){
   // float i_score = get_score(*n,acn);
-  // DATABASE n_d = modify_DB_Markov(*n,d);
-  DATABASE n_d = modify_database(d,*n);
+  DATABASE n_d = modify_DB_Markov(*n,d);
+  // DATABASE n_d = modify_database(d,*n);
 
   m_step(n,n_d);
   time_t now_time = time(NULL);
-  while ((now_time - start_time)<40){
+  while ((now_time - start_time)<100){
     // for (int k = 0; k<5;k++){
     //   for (int l = 0; l<37;l++){
     //     cout<<d[k][l]<<" ";
@@ -352,8 +375,8 @@ void pipeline(network *n, DATABASE d,network acn,time_t start_time){
     // cout<<endl<<endl<<endl;
 
 
-    n_d = modify_database(d,*n);
-    // n_d = modify_DB_Markov(*n,d);
+    // n_d = modify_database(d,*n);
+    n_d = modify_DB_Markov(*n,d) ;
     //
     // for (int k = 0; k<5;k++){
     //   for (int l = 0; l<37;l++){
@@ -363,9 +386,9 @@ void pipeline(network *n, DATABASE d,network acn,time_t start_time){
     // }
     m_step(n,n_d);
 
-      list<Graph_Node>::iterator g = ((*n)).get_nth_node(36);
-      // for (int i = 0; i< (*g).get_CPT().size();i++){
-      cout<<((*g).get_CPT())[0]<<endl;
+      // list<Graph_Node>::iterator g = ((*n)).get_nth_node(36);
+      // // for (int i = 0; i< (*g).get_CPT().size();i++){
+      // cout<<((*g).get_CPT())[0]<<endl;
 
 
 
@@ -388,6 +411,78 @@ void pipeline(network *n, DATABASE d,network acn,time_t start_time){
 }
 
 
+vector<string> splitString(string s, string delimiter){
+    size_t pos = 0;
+    vector<string> tokens;
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+      tokens.push_back(s.substr(0, pos));
+      s.erase(0, pos + delimiter.length());
+    }
+    tokens.push_back(s);
+    return tokens;
+}
+
+void save_file(network n, string filename) {
+    ifstream innfile(filename);
+    string outname = "solved_alarm.bif";
+    ofstream outfile;
+    outfile.open(outname);
+    string temp;
+    vector<string> values;
+    string line;
+    list<Graph_Node>::iterator orig_it = n.get_nth_node(0);
+    int num_lines = 0;
+
+    if (innfile.is_open())
+    {
+      while (! innfile.eof() ){
+         getline(innfile,line);
+         num_lines++;
+      }
+    }
+    innfile.close();
+    num_lines--;
+
+    int line_num = 0;
+    ifstream infile(filename);
+    if (infile.is_open())
+    {
+      while (! infile.eof() )
+      {
+          stringstream ss;
+            getline (infile,line);
+            ss.str(line);
+          ss>>temp;
+          if(temp.compare("probability")==0)
+          {
+        outfile<<line<<endl;
+        //cout<<"1"<<endl;
+                getline (infile,line);
+        //cout<<"2"<<endl;
+        vector<string> split = splitString(line,"-1");
+        vector<float> cpt = (*orig_it).get_CPT();
+
+        outfile<<split[0];
+        for(int j=1; j<split.size(); j++){
+            outfile<< fixed << setprecision(4) << cpt[j-1];
+                outfile<<split[j];
+        }
+        if(line_num<num_lines) outfile<<endl;
+                orig_it++;
+                line_num+=2;
+            }
+            else {
+                outfile<<line;
+                if(line_num<num_lines){outfile<<endl;}
+                line_num++;
+            }
+        }
+    }
+    outfile.close();
+    infile.close();
+}
+
+
 int main(int argc, char const *argv[]) {
     network Alarm;
     // string infile="alarm.bif";
@@ -395,6 +490,7 @@ int main(int argc, char const *argv[]) {
     // string recfile = "records.dat";
     string recfile = argv[2];
     string outfile  = "solved_"+infile;
+
     time_t start_time = time(NULL);
     (Alarm) = read_network(infile);
     DATABASE d = dat_reader(recfile,Alarm);
@@ -402,7 +498,7 @@ int main(int argc, char const *argv[]) {
     network g_alarm = read_network("gold_alarm.bif");
     DATABASE n_d = modify_database(d,Alarm);
 
-    m_step(&Alarm,n_d);
+    // m_step(&Alarm,n_d);
     // cout<<"Ok"<<endl;
     // n_d = modify_database(d,Alarm);
     // m_step(&Alarm,n_d);
@@ -414,9 +510,10 @@ int main(int argc, char const *argv[]) {
     // }
     // cout<<endl;
     // m_step(&Alarm,n_d);
-    // pipeline(&Alarm,d,g_alarm,start_time);
+    pipeline(&Alarm,d,g_alarm,start_time);
     // DATABASE new_db = modify_database(d,Alarm);
 
+    save_file(Alarm,infile);
 
 
     for (int j = 0;j<37;j++){
