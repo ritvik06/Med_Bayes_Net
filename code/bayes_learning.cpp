@@ -311,49 +311,21 @@ void m_step(network* n, DATABASE db){
 
 }
 
-
 float get_score(network n,network acn){
   float score = 0;
   for (int i =0; i< 37;i++){
 
-<<<<<<< HEAD
-
-int main(int argc, char const *argv[]) {
-    network Alarm;
-
-// <<<<<<< HEAD
-//     vector<vector<int> > 
-//     Alarm = read_network();
-//     dat_reader(Alarm);
-
-//     initialize_probability(Alarm,)
-//     // Graph_Node g = *(Alarm.get_nth_node(0));
-// =======
-    (Alarm) = read_network();
-    // cout<<"Test"<<endl;
-    DATABASE d = dat_reader(Alarm);
-    initialize_probability(&Alarm,d);
-    DATABASE new_db = modify_DB_Markov(Alarm,d);
-
-    for(int i=0;i<5;i++){
-      for(int j=0;j<37;j++){
-        cout << d[i][j] << " ";
-      }
-      cout << endl;
-=======
     Graph_Node g = *(n.get_nth_node(i));
     Graph_Node acg = *(acn.get_nth_node(i));
     vector<float> g_cpt = g.get_CPT();
     vector<float> acg_cpt = acg.get_CPT();
     for (int k =0; k<g_cpt.size();k++){
       score+= abs(g_cpt[k] - acg_cpt[k]);
->>>>>>> e5a3a34a67bc282649c0c0f04066da57b1a197e5
     }
   }
 
   return score;
 }
-//n has probability initialised
 
 void pipeline(network *n, DATABASE d,network acn){
   float i_score = get_score(*n,acn);
