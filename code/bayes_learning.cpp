@@ -16,9 +16,11 @@ void initialize_probability(network* n, DATABASE db){
   list <Graph_Node>::iterator it;
   int ind=0;
   for (it = g_l.begin();it!=g_l.end();it++){
-    Graph_Node* curr_node = &(*((*n).get_nth_node(ind)));
+    // Graph_Node* curr_node = &(*((*n).get_nth_node(ind)));
+    Graph_Node* curr_node = &(*it);
     vector<float> curr_table = (*curr_node).get_CPT();
-    if ((*curr_node).get_Parents().size()!=0){ //If not a starting node
+    int index_of_node =  (*n).get_index((*curr_node).get_name());
+    // if ((*curr_node).get_Parents().size()!=0){ //If not a starting node
       float filled=0;
       int num=0;
       for (int i = 0; i< curr_table.size();i++){
@@ -35,26 +37,26 @@ void initialize_probability(network* n, DATABASE db){
         }
     }
     (*curr_node).set_CPT(curr_table);
-  }else{
-    int n_r = db.size();
-    int n_c = db[0].size();
-    int all_v = (*curr_node).get_nvalues();
-    vector<float> freq(all_v,0);
-    int all_sum=0;
-    for (int i = 0; i< n_r;i++){
-      int val = db[i][ind];
-      if (val >= 0){
-        freq[val]++;
-        all_sum++;
-      }
-    }
-    for (int i = 0; i<all_v;i++){
-      freq[i]/=all_sum;
-    }
-    (*curr_node).set_CPT(freq);
-  }
+  // }else{
+  //   int n_r = db.size();
+  //   int n_c = db[0].size();
+  //   int all_v = (*curr_node).get_nvalues();
+  //   vector<float> freq(all_v,0);
+  //   int all_sum=0;
+  //   for (int i = 0; i< n_r;i++){
+  //     int val = db[i][index_of_node];
+  //     if (val >= 0){
+  //       freq[val]++;
+  //       all_sum++;
+  //     }
+  //   }
+  //   for (int i = 0; i<all_v;i++){
+  //     freq[i]/=all_sum;
+  //   }
+  //   (*curr_node).set_CPT(freq);
+  // }
   // cout<<curr_node.get_CPT()[0]<<endl;
-  ind++;
+  // ind++;
   // cout<<ind<<endl;
 }
 
@@ -99,15 +101,15 @@ DATABASE modify_database(DATABASE db, network &n){
     }
     // cout << endl;
 
-    float random = ((float) rand()/RAND_MAX);
+    // float random = ((float) rand()/RAND_MAX);
     // cout << random;
-    sort(prob_list.begin(),prob_list.end());
-    for(x = prob_list.begin();x!=prob_list.end();x++){
-      if(random>(*x)) break;
-    }
+    // sort(prob_list.begin(),prob_list.end());
+    // for(x = prob_list.begin();x!=prob_list.end();x++){
+    //   if(random>(*x)) break;
+    // }
 
 
-    db[i][index] = distance(prob_list.begin(),x);
+    db[i][index] = distance(prob_list.begin(),max_element(prob_list.begin(),prob_list.end()));
 
     prob_list.clear();
   }
@@ -139,9 +141,12 @@ void m_step(network* n, DATABASE db){
         index_list.push_back(curr_ind);
         org_max_list_mul*=((*p_node).get_nvalues());
       }
-      index_list.push_back((*curr_node).find_index((*curr_node).get_name()));
 
-      // cout<<"Current Index: "<<i<<" Index conversion: "<<prob.size()<<endl;
+      index_list.push_back((*n).get_index((*curr_node).get_name()));
+
+      // cout<< test<<endl;
+
+      sort(index_list.begin(),index_list.end());
 
       // cout<<"Size of max_pos_list: "<<index_list.size()<<endl;
       // for (int w = 0; w<index_list.size();w++){
@@ -193,6 +198,13 @@ void m_step(network* n, DATABASE db){
               }
             }
             if (okRow){
+              // if (index_list.size() >2){
+              //   cout<<"Row: ";
+              //   for (int l = 0; l<index_list.size();l++){
+              //     cout<<db[j][index_list[l]]<<" ";
+              //   }
+              //   cout<<endl;
+              // }
               count++;
             }
           }
@@ -231,13 +243,18 @@ float get_score(network n,network acn){
 
 void pipeline(network *n, DATABASE d,network acn){
   float i_score = get_score(*n,acn);
+  // cout<<d[0][11]<<endl;
+
   DATABASE n_d = modify_database(d,*n);
+  // cout<<n_d[0][11]<<endl;
+
   m_step(n,n_d);
   float f_score = get_score(*n,acn);
   cout<<"f: "<<f_score<<" i: "<<i_score<<endl;
-  while (f_score>i_score){// && (f_score - i_score)>= 0){ //Change this
+  while (f_score<=i_score || f_score-i_score<40){// && (f_score - i_score)>= 0){ //Change this
     i_score = f_score;
     n_d = modify_database(n_d,*n);
+    // cout<<n_d[0][11]<<endl;
     m_step(n,n_d);
     f_score = get_score(*n,acn);
     cout<<"f: "<<f_score<<" i: "<<i_score<<endl;
@@ -254,6 +271,12 @@ int main(int argc, char const *argv[]) {
     DATABASE d = dat_reader(recfile,Alarm);
     initialize_probability(&Alarm,d);
     network g_alarm = read_network("gold_alarm.bif");
+    DATABASE n_d = modify_database(d,Alarm);
+    // for (int i= 0; i<11;i++){
+    //   cout<<n_d[0][i]<<" ";
+    // }
+    // cout<<endl;
+    // m_step(&Alarm,n_d);
     pipeline(&Alarm,d,g_alarm);
     // DATABASE new_db = modify_database(d,Alarm);
 
