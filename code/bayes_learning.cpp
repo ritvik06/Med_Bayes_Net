@@ -84,12 +84,12 @@ DATABASE modify_database(DATABASE db, network &n){
     for(int j=(parents.size()-1);j>=0;j--){
       if(j==parents.size()-1){
         sum+=db[i][n.get_index(parents[j])];
-        max_product=(*n.search_node(parents[j])).get_nvalues();
+        max_product=(*(n.search_node(parents[j]))).get_nvalues();
         // cout << "Entered";
       }
       else{
         sum+=(db[i][n.get_index(parents[j])]*max_product);
-        max_product*=(*n.search_node(parents[j])).get_nvalues();
+        max_product*=(*(n.search_node(parents[j]))).get_nvalues();
       }
 
     }
@@ -98,7 +98,6 @@ DATABASE modify_database(DATABASE db, network &n){
       temp_sum=0;
       temp_sum=sum+(j*max_product);
       prob_list.push_back(CPT_node[temp_sum]);
-      // cout << CPT_node[temp_sum] << " ";
     }
     // cout << endl;
 
@@ -226,11 +225,12 @@ void m_step(network* n, DATABASE db){
     int n_c = db[0].size();
 
     for (it = g_l.begin();it!=g_l.end();it++){
-      Graph_Node* curr_node = &(*((*n).get_nth_node(ind)));
+      // Graph_Node* curr_node = &(*it);
+      Graph_Node* curr_node  = &(*((*n).get_nth_node(ind)));
+      ind++;
       vector<float> curr_table = (*curr_node).get_CPT();
       vector<float> org_table = (*curr_node).get_org_CPT();
       int np = (*curr_node).get_nvalues();
-
       vector<string> parents = (*curr_node).get_Parents();
       vector<int> index_list,max_poss_list;
       int org_max_list_mul=1;
@@ -242,18 +242,21 @@ void m_step(network* n, DATABASE db){
         org_max_list_mul*=((*p_node).get_nvalues());
       }
 
-      index_list.push_back((*n).get_index((*curr_node).get_name()));
-
-      sort(index_list.begin(),index_list.end());
+      // index_list.push_back((*n).get_index((*curr_node).get_name()));
+      int ind = (*n).get_index( (*curr_node).get_name() );
+      index_list.insert(index_list.begin(),ind);
+      // sort(index_list.begin(),index_list.end());
 
       // cout<<"Size of max_pos_list: "<<index_list.size()<<endl;
       // for (int w = 0; w<index_list.size();w++){
       //   cout<<max_poss_list[w]<<" ";
       // }
       // cout<<endl;
+      // cout<< index_list.size()<<" ";
       // for (int w = 0; w<index_list.size();w++){
       //   cout<<index_list[w]<<" ";
       // }
+      // cout<<endl;
       // cout<<endl<<"Number of elements in CPT: "<<org_table.size()<<" N values of the node: "<<np<<endl;
       // cout<<"------------"<<endl;
 
@@ -269,7 +272,7 @@ void m_step(network* n, DATABASE db){
             max_list_mul=1;
           }
           prob.push_back(cur_p);
-          for (int t = 0; t<max_poss_list.size();t++){
+          for (int t = max_poss_list.size()-1; t>=0;t--){
             cur_p = rem/max_list_mul;
             rem = rem%max_list_mul;
             max_list_mul /=max_poss_list[t];
@@ -278,15 +281,9 @@ void m_step(network* n, DATABASE db){
             }
             prob.push_back(cur_p);
           }
-          // for (int y = 0; y< prob.size();y++){
-          //     cout<< prob[y]<<" ";
-          // }
-          // cout<<endl;
-          // cout<<"Size of prob: "<<prob.size()<<endl;
-          // for (int w = 0; w<index_list.size();w++){
-          //   cout<<index_list[w]<<" ";
-          // }
-          // cout<<endl;
+
+
+
           float count=0;
           for (int j=0;j<n_r;j++){
             bool okRow=true;
@@ -300,14 +297,6 @@ void m_step(network* n, DATABASE db){
               }
             }
             if (okRow){
-              // cout<<j<<" ";
-              // if (index_list.size() >2){
-              //   cout<<"Row: ";
-              //   for (int l = 0; l<index_list.size();l++){
-              //     cout<<db[j][index_list[l]]<<" ";
-              //   }
-              //   cout<<endl;
-              // }
               count++;
             }
           }
@@ -320,9 +309,12 @@ void m_step(network* n, DATABASE db){
         }
       }
       (*curr_node).set_CPT(final_table);
+      // cout<<"BOOM"<<endl;
+      // cout<<final_table[0]<<endl;
+
       // cout<<"Iteration finished."<<endl;
 
-      ind++;
+      // ind++;
     }
 
 }
@@ -345,12 +337,39 @@ float get_score(network n,network acn){
 
 void pipeline(network *n, DATABASE d,network acn,time_t start_time){
   // float i_score = get_score(*n,acn);
+  // DATABASE n_d = modify_DB_Markov(*n,d);
   DATABASE n_d = modify_database(d,*n);
+
   m_step(n,n_d);
   time_t now_time = time(NULL);
-  while ((now_time - start_time)<10){
-    n_d = modify_database(n_d,*n);
+  while ((now_time - start_time)<40){
+    // for (int k = 0; k<5;k++){
+    //   for (int l = 0; l<37;l++){
+    //     cout<<d[k][l]<<" ";
+    //   }
+    //   cout<<endl;
+    // }
+    // cout<<endl<<endl<<endl;
+
+
+    n_d = modify_database(d,*n);
+    // n_d = modify_DB_Markov(*n,d);
+    //
+    // for (int k = 0; k<5;k++){
+    //   for (int l = 0; l<37;l++){
+    //     cout<<n_d[k][l]<<" ";
+    //   }
+    //   cout<<endl;
+    // }
     m_step(n,n_d);
+
+      list<Graph_Node>::iterator g = ((*n)).get_nth_node(36);
+      // for (int i = 0; i< (*g).get_CPT().size();i++){
+      cout<<((*g).get_CPT())[0]<<endl;
+
+
+
+
     now_time = time(NULL);
   }
 
@@ -371,16 +390,21 @@ void pipeline(network *n, DATABASE d,network acn,time_t start_time){
 
 int main(int argc, char const *argv[]) {
     network Alarm;
-    string infile="alarm.bif";
-    string recfile = "records.dat";
+    // string infile="alarm.bif";
+    string infile = argv[1];
+    // string recfile = "records.dat";
+    string recfile = argv[2];
+    string outfile  = "solved_"+infile;
     time_t start_time = time(NULL);
     (Alarm) = read_network(infile);
     DATABASE d = dat_reader(recfile,Alarm);
     initialize_probability(&Alarm,d);
     network g_alarm = read_network("gold_alarm.bif");
     DATABASE n_d = modify_database(d,Alarm);
-    // m_step(&Alarm,n_d);
-    // n_d = modify_database(n_d,Alarm);
+
+    m_step(&Alarm,n_d);
+    // cout<<"Ok"<<endl;
+    // n_d = modify_database(d,Alarm);
     // m_step(&Alarm,n_d);
     // n_d = modify_database(n_d,Alarm);
     // m_step(&Alarm,n_d);
@@ -390,7 +414,7 @@ int main(int argc, char const *argv[]) {
     // }
     // cout<<endl;
     // m_step(&Alarm,n_d);
-    pipeline(&Alarm,d,g_alarm,start_time);
+    // pipeline(&Alarm,d,g_alarm,start_time);
     // DATABASE new_db = modify_database(d,Alarm);
 
 
