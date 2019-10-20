@@ -66,6 +66,7 @@ DATABASE modify_database(DATABASE db, network &n){
   vector<float> CPT_node;
   vector<int> CPT_num;
   vector<float> prob_list;
+  vector<float>::iterator x;
   // int alpha = 0.5;
   int first_rank;
   int second_rank;
@@ -97,8 +98,16 @@ DATABASE modify_database(DATABASE db, network &n){
       // cout << CPT_node[temp_sum] << " ";
     }
     // cout << endl;
+
+    float random = ((float) rand()/RAND_MAX);
+    // cout << random;
+    sort(prob_list.begin(),prob_list.end());
+    for(x = prob_list.begin();x!=prob_list.end();x++){
+      if(random>(*x)) break;
+    }
+
     
-    db[i][index] = distance(prob_list.begin(),max_element(prob_list.begin(),prob_list.end()));
+    db[i][index] = distance(prob_list.begin(),x);
 
     prob_list.clear();
   }
@@ -208,6 +217,8 @@ int main(int argc, char const *argv[]) {
       }
       cout << endl;
     }
+
+    m_step(&Alarm,new_db);
 
     // for (int j = 0;j<37;j++){
     //   cout<<"------"<<j+1<<"-----"<<endl;
