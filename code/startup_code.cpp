@@ -139,6 +139,8 @@
 vector<int> ques_pos;
 // network Alarm;
 
+vector<string>lines;
+
 network read_network(string filename)
 {
 	network Alarm;
@@ -163,7 +165,7 @@ network read_network(string filename)
 
      		if(temp.compare("variable")==0)
      		{
-
+            lines.push_back(line);
      				ss>>name;
      				getline (myfile,line);
 
@@ -233,7 +235,7 @@ network read_network(string filename)
      		}
             else
             {
-
+              lines.push_back(line);
             }
     	}
 
@@ -243,6 +245,12 @@ network read_network(string filename)
 
   	return Alarm;
 }
+
+
+void write_network(string outfile){
+
+}
+
 
 DATABASE dat_reader(string filename,network n)
 {

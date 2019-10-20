@@ -212,6 +212,38 @@ void m_step(network* n, DATABASE db){
 }
 
 
+float get_score(network n,network acn){
+  float score = 0;
+  for (int i =0; i< 37;i++){
+
+    Graph_Node g = *(n.get_nth_node(i));
+    Graph_Node acg = *(acn.get_nth_node(i));
+    vector<float> g_cpt = g.get_CPT();
+    vector<float> acg_cpt = acg.get_CPT();
+    for (int k =0; k<g_cpt.size();k++){
+      score+= abs(g_cpt[k] - acg_cpt[k]);
+    }
+  }
+
+  return score;
+}
+//n has probability initialised
+
+void pipeline(network *n, DATABASE d,network acn){
+  float i_score = get_score(*n,acn);
+  DATABASE n_d = modify_database(d,*n);
+  m_step(n,n_d);
+  float f_score = get_score(*n,acn);
+  cout<<"f: "<<f_score<<" i: "<<i_score<<endl;
+  while (f_score>i_score){// && (f_score - i_score)>= 0){ //Change this
+    i_score = f_score;
+    n_d = modify_database(n_d,*n);
+    m_step(n,n_d);
+    f_score = get_score(*n,acn);
+    cout<<"f: "<<f_score<<" i: "<<i_score<<endl;
+  }
+  cout<<"f: "<<f_score<<" i: "<<i_score<<endl;
+}
 
 
 int main(int argc, char const *argv[]) {
@@ -219,43 +251,21 @@ int main(int argc, char const *argv[]) {
     string infile="alarm.bif";
     string recfile = "records.dat";
     (Alarm) = read_network(infile);
-    // cout<<"Test"<<endl;
     DATABASE d = dat_reader(recfile,Alarm);
     initialize_probability(&Alarm,d);
-    DATABASE new_db = modify_database(d,Alarm);
+    network g_alarm = read_network("gold_alarm.bif");
+    pipeline(&Alarm,d,g_alarm);
+    // DATABASE new_db = modify_database(d,Alarm);
 
-    // for(int i=0;i<5;i++){
-    //   for(int j=0;j<37;j++){
-    //     cout << d[i][j] << " ";
+    // for (int j = 0;j<37;j++){
+    //   cout<<"------"<<j+1<<"-----"<<endl;
+    //   list<Graph_Node>::iterator g = (Alarm.get_nth_node(j));
+    //   cout<<"Num of Parents: "<<(*g).get_Parents().size()<<endl;
+    //   for (int i = 0; i< (*g).get_CPT().size();i++){
+    //     cout<<((*g).get_CPT())[i]<<endl;
     //   }
-    //   cout << endl;
-    // }
-    //   cout << endl;
-    //   cout << endl;
-    //   cout << endl;
-    //   cout << endl;
-    //
-    //
-    // for(int i=0;i<5;i++){
-    //   for(int j=0;j<37;j++){
-    //     cout << new_db[i][j] << " ";
-    //   }
-    //   cout << endl;
+    //   // cout<<"------"<<endl;
     // }
 
-    // m_step(&Alarm,new_db);
-
-    for (int j = 0;j<37;j++){
-      cout<<"------"<<j+1<<"-----"<<endl;
-      list<Graph_Node>::iterator g = (Alarm.get_nth_node(j));
-      cout<<"Num of Parents: "<<(*g).get_Parents().size()<<endl;
-      for (int i = 0; i< (*g).get_CPT().size();i++){
-        cout<<((*g).get_CPT())[i]<<endl;
-      }
-      // cout<<"------"<<endl;
-    }
-
-    // Graph_Node g = *(Alarm.get_nth_node())
-    // cout<<it.begin()<<" "<<it++<<" "<<endl;
   return 0;
 }

@@ -5,5 +5,8 @@
 void initialize_probability(network *n, DATABASE db);
 void m_step(network *n, DATABASE db);
 DATABASE modify_database(DATABASE db, network &n);
+float get_score(network n,network acn);
+void pipeline(network *n, DATABASE d,network acn);
+
 
 #endif
