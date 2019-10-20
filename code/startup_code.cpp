@@ -139,12 +139,14 @@
 vector<int> ques_pos;
 // network Alarm;
 
-network read_network()
+vector<string>lines;
+
+network read_network(string filename)
 {
 	network Alarm;
 	string line;
 	int find=0;
-  	ifstream myfile("alarm.bif");
+  	ifstream myfile(filename);
   	string temp;
   	string name;
   	vector<string> values;
@@ -163,7 +165,7 @@ network read_network()
 
      		if(temp.compare("variable")==0)
      		{
-
+            lines.push_back(line);
      				ss>>name;
      				getline (myfile,line);
 
@@ -233,7 +235,7 @@ network read_network()
      		}
             else
             {
-
+              lines.push_back(line);
             }
     	}
 
@@ -244,12 +246,18 @@ network read_network()
   	return Alarm;
 }
 
-DATABASE dat_reader(network n)
+
+void write_network(string outfile){
+
+}
+
+
+DATABASE dat_reader(string filename,network n)
 {
     DATABASE data_values;
 	string val;
 	ifstream myfile;
-	myfile.open("records.dat");
+	myfile.open(filename);
 	vector<int> row;
 
 	if(myfile.is_open()){
