@@ -48,8 +48,8 @@ extern vector<vector<int> > data_values;
 extern vector<int> ques_pos;
 // extern network Alarm;
 
-network read_network();
-DATABASE dat_reader(network n);
+network read_network(string filename);
+DATABASE dat_reader(string filename,network n);
 
 
 #endif

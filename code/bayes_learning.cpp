@@ -216,9 +216,11 @@ void m_step(network* n, DATABASE db){
 
 int main(int argc, char const *argv[]) {
     network Alarm;
-    (Alarm) = read_network();
+    string infile="alarm.bif";
+    string recfile = "records.dat";
+    (Alarm) = read_network(infile);
     // cout<<"Test"<<endl;
-    DATABASE d = dat_reader(Alarm);
+    DATABASE d = dat_reader(recfile,Alarm);
     initialize_probability(&Alarm,d);
     DATABASE new_db = modify_database(d,Alarm);
 
@@ -241,17 +243,17 @@ int main(int argc, char const *argv[]) {
     //   cout << endl;
     // }
 
-    m_step(&Alarm,new_db);
+    // m_step(&Alarm,new_db);
 
-    // for (int j = 0;j<37;j++){
-    //   cout<<"------"<<j+1<<"-----"<<endl;
-    //   list<Graph_Node>::iterator g = (Alarm.get_nth_node(j));
-    //   cout<<"Num of Parents: "<<(*g).get_Parents().size()<<endl;
-    //   for (int i = 0; i< (*g).get_CPT().size();i++){
-    //     cout<<((*g).get_CPT())[i]<<endl;
-    //   }
-    //   // cout<<"------"<<endl;
-    // }
+    for (int j = 0;j<37;j++){
+      cout<<"------"<<j+1<<"-----"<<endl;
+      list<Graph_Node>::iterator g = (Alarm.get_nth_node(j));
+      cout<<"Num of Parents: "<<(*g).get_Parents().size()<<endl;
+      for (int i = 0; i< (*g).get_CPT().size();i++){
+        cout<<((*g).get_CPT())[i]<<endl;
+      }
+      // cout<<"------"<<endl;
+    }
 
     // Graph_Node g = *(Alarm.get_nth_node())
     // cout<<it.begin()<<" "<<it++<<" "<<endl;
