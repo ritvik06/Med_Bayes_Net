@@ -82,9 +82,10 @@ DATABASE modify_database(DATABASE db, network &n){
     sum=0,temp_sum=0;
     max_product=1;
     for(int j=(parents.size()-1);j>=0;j--){
-      if(j==parents.size()){
-        sum+=db[i][n.get_index(parents[j])];
+      if(j==parents.size()-1){
+        sum+=db[i][n.get_index(parents[j])];  
         max_product=(*n.search_node(parents[j])).get_nvalues();
+        // cout << "Entered";
       }
       else{
         sum+=(db[i][n.get_index(parents[j])]*max_product);
@@ -109,6 +110,105 @@ DATABASE modify_database(DATABASE db, network &n){
     // }
 
 
+    db[i][index] = distance(prob_list.begin(),max_element(prob_list.begin(),prob_list.end()));
+
+    prob_list.clear();
+  }
+
+  return db;
+
+}
+
+DATABASE modify_DB_Markov(network &n,DATABASE db){
+  vector<string> parents;
+  vector<int> children;
+  vector<float> CPT_node;
+  vector<int> CPT_num;
+  vector<float> prob_list;
+  vector<float>::iterator x;
+  // int alpha = 0.5;
+  int first_rank;
+  int second_rank;
+  int max_product,sum,temp_sum;
+  int prod,max_child,sum_child,temp_child;
+
+
+  for(int i=0;i<db.size();i++){
+    int index = ques_pos[i];
+    Graph_Node ques_node = (*n.get_nth_node(index));
+    parents = ques_node.get_Parents();
+    children = ques_node.get_children();
+    // for(int j=0;j<children.size();j++){
+    //   cout << children[j] << " ";
+    // }
+    CPT_node = ques_node.get_CPT();
+    sum=0,temp_sum=0;
+    max_product=1;
+    for(int j=(parents.size()-1);j>=0;j--){
+      if(j==parents.size()-1){
+        sum+=db[i][n.get_index(parents[j])];  
+        max_product=(*n.search_node(parents[j])).get_nvalues();
+      }
+      else{
+        sum+=(db[i][n.get_index(parents[j])]*max_product);
+        max_product*=(*n.search_node(parents[j])).get_nvalues();
+      }
+      // cout << sum << " "];
+
+    }
+
+
+    // cout << endl;
+
+    // float random = ((float) rand()/RAND_MAX);
+    // // cout << random;
+    // sort(prob_list.begin(),prob_list.end());
+    // for(x = prob_list.begin();x!=prob_list.end();x++){
+    //   if(random>(*x)) break;
+    // }
+    prod=1;
+    for(int k=0;k<children.size();k++){
+      sum_child = 0;
+
+      Graph_Node child_node = *(n.get_nth_node(children[k]));
+      vector<float> child_CPT = child_node.get_CPT();
+      // for(int a=0;a<child_CPT.size();a++){
+      //   cout << child_CPT[a] << " ";
+      // }
+      vector<string> child_parents = child_node.get_Parents();
+
+      for(int j=(child_parents.size()-1);j>=0;j--){
+        if(j==child_parents.size()){
+          sum_child+=db[i][n.get_index(child_parents[j])];  
+          max_child=(*n.search_node(child_parents[j])).get_nvalues();
+        }
+        else{
+          sum_child+=(db[i][n.get_index(child_parents[j])]*max_child);
+          max_child*=(*n.search_node(child_parents[j])).get_nvalues();
+        }
+
+      }
+
+      temp_child = sum_child + (db[i][k]*max_child);
+      prod = prod*temp_child;
+      // cout << temp_child;
+
+      // for(int j=0;j<ques_node.get_nvalues();j++){
+      //   temp_sum=0;
+      //   temp_sum=sum+(j*max_product);
+      //   prob_list.push_back(CPT_node[temp_sum]);
+      //   // cout << CPT_node[temp_sum] << " ";
+      // }
+    }
+
+    for(int j=0;j<ques_node.get_nvalues();j++){
+      temp_sum=0;
+      temp_sum=sum+(j*max_product);
+      prob_list.push_back(CPT_node[temp_sum]*prod);
+      // cout << CPT_node[temp_sum] << " ";
+    }
+
+    // cout << prod << endl;
     db[i][index] = distance(prob_list.begin(),max_element(prob_list.begin(),prob_list.end()));
 
     prob_list.clear();
@@ -223,7 +323,6 @@ void m_step(network* n, DATABASE db){
 
 }
 
-
 float get_score(network n,network acn){
   float score = 0;
   for (int i =0; i< 37;i++){
@@ -239,7 +338,6 @@ float get_score(network n,network acn){
 
   return score;
 }
-//n has probability initialised
 
 void pipeline(network *n, DATABASE d,network acn){
   float i_score = get_score(*n,acn);
@@ -279,6 +377,8 @@ int main(int argc, char const *argv[]) {
     // m_step(&Alarm,n_d);
     pipeline(&Alarm,d,g_alarm);
     // DATABASE new_db = modify_database(d,Alarm);
+
+
 
     // for (int j = 0;j<37;j++){
     //   cout<<"------"<<j+1<<"-----"<<endl;
