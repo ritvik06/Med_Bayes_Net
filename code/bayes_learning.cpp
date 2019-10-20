@@ -81,7 +81,7 @@ DATABASE modify_database(DATABASE db, network &n){
     max_product=1;
     for(int j=(parents.size()-1);j>=0;j--){
       if(j==parents.size()){
-        sum+=db[i][n.get_index(parents[j])];  
+        sum+=db[i][n.get_index(parents[j])];
         max_product=(*n.search_node(parents[j])).get_nvalues();
       }
       else{
@@ -106,7 +106,7 @@ DATABASE modify_database(DATABASE db, network &n){
       if(random>(*x)) break;
     }
 
-    
+
     db[i][index] = distance(prob_list.begin(),x);
 
     prob_list.clear();
@@ -131,32 +131,61 @@ void m_step(network* n, DATABASE db){
 
       vector<string> parents = (*curr_node).get_Parents();
       vector<int> index_list,max_poss_list;
+      int org_max_list_mul=1;
       for (int i = 0; i<parents.size();i++){
         int curr_ind = (*n).get_index(parents[i]);
         Graph_Node *p_node = &(*((*n).get_nth_node(curr_ind)));
         max_poss_list.push_back((*p_node).get_nvalues());
         index_list.push_back(curr_ind);
+        org_max_list_mul*=((*p_node).get_nvalues());
       }
+      index_list.push_back((*curr_node).find_index((*curr_node).get_name()));
+
+      // cout<<"Current Index: "<<i<<" Index conversion: "<<prob.size()<<endl;
+
+      // cout<<"Size of max_pos_list: "<<index_list.size()<<endl;
+      // for (int w = 0; w<index_list.size();w++){
+      //   cout<<max_poss_list[w]<<" ";
+      // }
+      // cout<<endl;
+      // for (int w = 0; w<index_list.size();w++){
+      //   cout<<index_list[w]<<" ";
+      // }
+      // cout<<endl<<"Number of elements in CPT: "<<org_table.size()<<" N values of the node: "<<np<<endl;
+      // cout<<"------------"<<endl;
 
       vector<float> final_table;
       for (int i = 0; i<org_table.size();i++){
         if (org_table[i] == -1){
+          int max_list_mul=org_max_list_mul;
           vector<int>prob;
-          int cur_p = i/np;
-          int rem =  i%np;
+          int cur_p = i/max_list_mul;
+          int rem =  i%max_list_mul;
+          max_list_mul/=np;
+          if (max_list_mul==0){
+            max_list_mul=1;
+          }
           prob.push_back(cur_p);
           for (int t = 0; t<max_poss_list.size();t++){
-            cur_p = rem/max_poss_list[t];
-            rem = rem%max_poss_list[t];
+            cur_p = rem/max_list_mul;
+            rem = rem%max_list_mul;
+            max_list_mul /=max_poss_list[t];
+            if (max_list_mul == 0){
+              max_list_mul=1;
+            }
             prob.push_back(cur_p);
           }
-
-
-          int count=0;
+          // for (int y = 0; y< prob.size();y++){
+          //     cout<< prob[y]<<" ";
+          // }
+          // cout<<endl;
+          // cout<<"Size of prob: "<<prob.size()<<endl;
+          float count=0;
           for (int j=0;j<n_r;j++){
             bool okRow=true;
             for (int l = 0; l<index_list.size();l++){
-              if (db[j][l] == prob[l]){
+              int db_col = index_list[l];
+              if (db[j][db_col] == prob[l]){
                 continue;
               }else{
                 okRow=false;
@@ -167,13 +196,16 @@ void m_step(network* n, DATABASE db){
               count++;
             }
           }
-          float ans = count/n_r;
+          float ans = ((float) count/n_r);
+          // cout<<count<<" "<<" "<<n_r<<" "<<ans<<" "<<endl;
           final_table.push_back(ans);
         }else{
           final_table.push_back(curr_table[i]);
         }
       }
       (*curr_node).set_CPT(final_table);
+      // cout<<"Iteration finished."<<endl;
+
       ind++;
     }
 
@@ -184,39 +216,30 @@ void m_step(network* n, DATABASE db){
 
 int main(int argc, char const *argv[]) {
     network Alarm;
-
-// <<<<<<< HEAD
-//     vector<vector<int> > 
-//     Alarm = read_network();
-//     dat_reader(Alarm);
-
-//     initialize_probability(Alarm,)
-//     // Graph_Node g = *(Alarm.get_nth_node(0));
-// =======
     (Alarm) = read_network();
     // cout<<"Test"<<endl;
     DATABASE d = dat_reader(Alarm);
     initialize_probability(&Alarm,d);
     DATABASE new_db = modify_database(d,Alarm);
 
-    for(int i=0;i<5;i++){
-      for(int j=0;j<37;j++){
-        cout << d[i][j] << " ";
-      }
-      cout << endl;
-    }
-      cout << endl;
-      cout << endl;
-      cout << endl;
-      cout << endl;
-
-
-    for(int i=0;i<5;i++){
-      for(int j=0;j<37;j++){
-        cout << new_db[i][j] << " ";
-      }
-      cout << endl;
-    }
+    // for(int i=0;i<5;i++){
+    //   for(int j=0;j<37;j++){
+    //     cout << d[i][j] << " ";
+    //   }
+    //   cout << endl;
+    // }
+    //   cout << endl;
+    //   cout << endl;
+    //   cout << endl;
+    //   cout << endl;
+    //
+    //
+    // for(int i=0;i<5;i++){
+    //   for(int j=0;j<37;j++){
+    //     cout << new_db[i][j] << " ";
+    //   }
+    //   cout << endl;
+    // }
 
     m_step(&Alarm,new_db);
 
