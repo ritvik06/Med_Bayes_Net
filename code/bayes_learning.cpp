@@ -217,13 +217,111 @@ DATABASE modify_DB_Markov(network &n,DATABASE db){
 
 }
 
-// vector<int>getParentsFromIndex(vector<int> max_list, int index){ //max_list includes the current node's max
-//
-//
-//
-//
-// }
+vector<int>getParentsFromIndex(vector<int> max_list, int index){ //max_list includes the current node's max
+  int all_mul=1;
+  vector<int>ans;
+  for (int i = 0;i< max_list.size();i++){
+    all_mul*=max_list[i];
+  }
+  for (int i = 0; i<max_list.size();i++){
+    all_mul/=max_list[i];
+    int a = index/all_mul;
+    index = index%all_mul;
+    ans.push_back(a);
+  }
+  return ans;
+}
 
+int getIndexFromParents(vector<int>max_list,vector<int>par){
+  int all_mul = 1;
+  for (int i = 0;i<par.size();i++){
+    all_mul*=max_list[i];
+  }
+  int ind = 0;
+  for (int i = 0; i<par.size();i++){
+    all_mul/=(max_list[i]);
+    ind+= par[i]*all_mul;
+  }
+  // ind+=par[par.size()-1];
+
+  return ind;
+}
+
+void new_m_step(network* n, DATABASE db){
+  list<Graph_Node> g_l = (*n).Pres_Graph;
+  list<Graph_Node>::iterator it;
+  int ind = 0;
+  int n_r = db.size();
+  int n_c = db[0].size();
+  for (it = g_l.begin();it!=g_l.end();it++){
+    Graph_Node* curr_node = &(*((*n).get_nth_node(ind)));
+    ind++;
+    vector<float> curr_table = (*curr_node).get_CPT();
+    vector<float> org_table = (*curr_node).get_org_CPT();
+    vector<string> parents = (*curr_node).get_Parents();
+    string name_of_node = (*curr_node).get_name();
+    int index_of_node = (*n).get_index(name_of_node);
+    int num_values = (*curr_node).get_nvalues();
+    vector<int> max_values_list = {num_values};
+    vector<int> index_list = {index_of_node};
+    for (int i  = 0; i< parents.size(); i++){
+      string parent_name = parents[i];
+      Graph_Node curr_parent = *((*n).search_node(parent_name));
+      int curr_parent_index = (*n).get_index(parent_name);
+      max_values_list.push_back(curr_parent.get_nvalues());
+      index_list.push_back(curr_parent_index);
+    }
+    vector<float> count_of_cpt(curr_table.size(),0.1);
+    vector<vector<int> > prob_list = {};
+    for (int i = 0; i<curr_table.size();i++){
+      vector<int> parent_val = getParentsFromIndex(max_values_list,i);
+      prob_list.push_back(parent_val);
+    }
+    for ( int i =0; i<n_r;i++){
+      vector<int> curr_row = db[i];
+      vector<int> val_at_index; //Value at the parent's index in DB
+
+      for ( int j = 0; j<index_list.size();j++){
+        int index_at_db = index_list[j];
+        val_at_index.push_back(curr_row[index_at_db]);
+      }
+
+      for (int j =0;j<curr_table.size();j++){
+        vector<int> curr_prob = prob_list[j];
+        if (curr_prob == val_at_index){
+          count_of_cpt[j]++;
+        }
+      }
+
+    }
+    vector<float> cpt_den(curr_table.size()/num_values,0.1);
+
+    for (int i = 0; i< count_of_cpt.size();i++){
+      vector<int> curr_prob = prob_list[i];
+      vector<int> sliced = vector<int>(curr_prob.begin()+1,curr_prob.end());
+      vector<int> sliced_max = vector<int>(max_values_list.begin()+1,max_values_list.end());
+      int ind = getIndexFromParents(sliced_max,sliced);
+      cpt_den[ind]+=count_of_cpt[i];
+    }
+    for (int i = 0; i< count_of_cpt.size();i++){
+      vector<int> curr_prob = prob_list[i];
+
+      vector<int>sliced = vector<int>(curr_prob.begin()+1,curr_prob.end());
+      vector<int>sliced_max = vector<int>(max_values_list.begin()+1,max_values_list.end());
+      int ind = getIndexFromParents(sliced_max,sliced);
+
+      count_of_cpt[i]/=cpt_den[ind];
+
+      if (count_of_cpt[i]<0.02){
+        count_of_cpt[i] = 0.01;
+      }else if(count_of_cpt[i]>0.97){
+        count_of_cpt[i] = 0.97;
+      }
+    }
+    (*curr_node).set_CPT(count_of_cpt);
+    // for(int i = 0; i< count)
+  }
+}
 
 void m_step(network* n, DATABASE db){
     list<Graph_Node> g_l = (*n).Pres_Graph;
@@ -382,12 +480,14 @@ void pipeline(network *n, DATABASE d,network acn,time_t start_time){
   // DATABASE n_d = modify_DB_Markov(*n,d);
   DATABASE n_d = modify_database(d,*n);
 
-  m_step(n,n_d);
+  new_m_step(n,n_d);
+  // m_step(n,n_d);
   time_t now_time = time(NULL);
-  while ((now_time - start_time)<20){
+  while ((now_time - start_time)<10){
     n_d = modify_database(d,*n);
     // n_d = modify_DB_Markov(*n,d) ;
-    m_step(n,n_d);
+    new_m_step(n,n_d);
+    // m_step(n,n_d);
 
       // list<Graph_Node>::iterator g = ((*n)).get_nth_node(36);
       // // for (int i = 0; i< (*g).get_CPT().size();i++){
@@ -488,33 +588,37 @@ void save_file(network n, string filename) {
 
 int main(int argc, char const *argv[]) {
     network Alarm;
-    // string infile="alarm.bif";
     string infile = argv[1];
-    // string recfile = "records.dat";
     string recfile = argv[2];
     string outfile  = "solved_"+infile;
-
+    // vector<int> a = {2};
+    // for (int i =0;i<2;i++){
+    //   vector<int> ab = getParentsFromIndex(a,i);
+    //   for (int j = 0;j<ab.size();j++){
+    //     cout<<ab[j]<<" ";
+    //   }
+    //   cout<<endl;
+    // }
     time_t start_time = time(NULL);
     (Alarm) = read_network(infile);
     DATABASE d = dat_reader(recfile,Alarm);
+    // new_m_step(&Alarm,d);
+
+
+    // vector<int> max_l = {2,3};
+    // vector<int> par = {1,2};
+    // cout << getIndexFromParents(max_l,par)<<endl;
+
+
     initialize_probability(&Alarm,d);
     network g_alarm = read_network("gold_alarm.bif");
-    DATABASE n_d = modify_database(d,Alarm);
+    // DATABASE n_d = modify_database(d,Alarm);
 
     // m_step(&Alarm,n_d);
-    // cout<<"Ok"<<endl;
     // n_d = modify_database(d,Alarm);
     // m_step(&Alarm,n_d);
-    // n_d = modify_database(n_d,Alarm);
-    // m_step(&Alarm,n_d);
 
-    // for (int i= 0; i<11;i++){
-    //   cout<<n_d[0][i]<<" ";
-    // }
-    // cout<<endl;
-    // m_step(&Alarm,n_d);
     pipeline(&Alarm,d,g_alarm,start_time);
-    // DATABASE new_db = modify_database(d,Alarm);
 
     save_file(Alarm,infile);
 
