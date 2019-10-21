@@ -217,6 +217,14 @@ DATABASE modify_DB_Markov(network &n,DATABASE db){
 
 }
 
+// vector<int>getParentsFromIndex(vector<int> max_list, int index){ //max_list includes the current node's max
+//
+//
+//
+//
+// }
+
+
 void m_step(network* n, DATABASE db){
     list<Graph_Node> g_l = (*n).Pres_Graph;
     list<Graph_Node>::iterator it;
@@ -270,9 +278,9 @@ void m_step(network* n, DATABASE db){
           int cur_p = i/max_list_mul;
           int rem =  i%max_list_mul;
           // max_list_mul/=np;
-          if (max_list_mul==0){
-            max_list_mul=1;
-          }
+          // if (max_list_mul==0){
+          //   max_list_mul=1;
+          // }
           prob.push_back(cur_p);
           // for (int t = max_poss_list.size()-1; t>=0;t--){
           for (int t = 0;t<max_poss_list.size();t++){
@@ -291,8 +299,12 @@ void m_step(network* n, DATABASE db){
           // cout<<endl;
 
 
-          float count=1;
-          float denominator=3;
+          // float count=1;
+          // float denominator=3;
+          // int e=1;
+          // int f = 1;
+          float count=0;
+          float denominator=0;
           for (int j=0;j<n_r;j++){
             bool okRow=true;
             bool den=true;
@@ -317,14 +329,25 @@ void m_step(network* n, DATABASE db){
               }
             }
             if (den){
-              denominator++;
+              denominator++;//= (1- 1/(pow(f,2)));
+              // f++;
             }
             if (okRow){
+              // count+=(1 + 1/(pow(e,2)));
               count++;
+              // e++;
             }
           }
           // cout<<denominator<<" "<<count<<endl;
-          float ans = ((float) count/denominator) ;
+          // denominator+=(denominator*0.1);
+          float ans;
+          if (denominator==0 || count==0){
+              ans = 0.0001;
+              // count++;
+              // denominator++;
+          }else{
+            ans = ((float) count/denominator) ;
+          }
           // cout<<count<<" "<<" "<<n_r<<" "<<ans<<" "<<endl;
           final_table.push_back(ans);
         }else{
@@ -332,10 +355,6 @@ void m_step(network* n, DATABASE db){
         }
       }
       (*curr_node).set_CPT(final_table);
-      // cout<<"BOOM"<<endl;
-      // cout<<final_table[0]<<endl;
-
-      // cout<<"Iteration finished."<<endl;
 
       // ind++;
     }
@@ -360,30 +379,14 @@ float get_score(network n,network acn){
 
 void pipeline(network *n, DATABASE d,network acn,time_t start_time){
   // float i_score = get_score(*n,acn);
-  DATABASE n_d = modify_DB_Markov(*n,d);
-  // DATABASE n_d = modify_database(d,*n);
+  // DATABASE n_d = modify_DB_Markov(*n,d);
+  DATABASE n_d = modify_database(d,*n);
 
   m_step(n,n_d);
   time_t now_time = time(NULL);
-  while ((now_time - start_time)<100){
-    // for (int k = 0; k<5;k++){
-    //   for (int l = 0; l<37;l++){
-    //     cout<<d[k][l]<<" ";
-    //   }
-    //   cout<<endl;
-    // }
-    // cout<<endl<<endl<<endl;
-
-
-    // n_d = modify_database(d,*n);
-    n_d = modify_DB_Markov(*n,d) ;
-    //
-    // for (int k = 0; k<5;k++){
-    //   for (int l = 0; l<37;l++){
-    //     cout<<n_d[k][l]<<" ";
-    //   }
-    //   cout<<endl;
-    // }
+  while ((now_time - start_time)<20){
+    n_d = modify_database(d,*n);
+    // n_d = modify_DB_Markov(*n,d) ;
     m_step(n,n_d);
 
       // list<Graph_Node>::iterator g = ((*n)).get_nth_node(36);
